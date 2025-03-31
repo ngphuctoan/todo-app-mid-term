@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:lts
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_USER_PASSWORD=${DB_PASS}
+
+  php_fpm:
+    build: ./backend
+    ports:
+      - 9000:9000
+    volumes:
+      - ./backend:/var/www/html
+      - composer_data:/var/www/vendor
+    env_file:
+      - .env
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 8080:80
+    volumes:
+      - ./frontend:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  mysql_data:
+  composer_data:
