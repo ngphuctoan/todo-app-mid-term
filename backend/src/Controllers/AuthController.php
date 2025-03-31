@@ -21,7 +21,7 @@ class AuthController {
             return ResponseHelper::handle($response, ["error" => "Invalid username or password."], 401);
         }
 
-        return ResponseHelper::handle($response, ["token" => $this->generateJwt($user)]);
+        return ResponseHelper::handle($response, ["token" => $this->generateJwt($user["name"])]);
     }
 
     public function register(Request $request, Response $response): Response {
@@ -38,12 +38,12 @@ class AuthController {
             : ResponseHelper::handle($response, ["error" => "Cannot create user."], 500);
     }
 
-    private function generateJwt(User $user): string {
+    private function generateJwt(string $userName): string {
         $issuedAt = time();
         $expiresAt = $issuedAt + 604800;
 
         return JWT::encode([
-            "sub" => $user->getId(),
+            "sub" => $userName,
             "iat" => $issuedAt,
             "exp" => $expiresAt
         ], $_ENV["JWT_SECRET_KEY"], "HS256");
