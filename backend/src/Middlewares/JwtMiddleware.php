@@ -33,8 +33,7 @@ class JwtMiddleware implements MiddlewareInterface {
     }
 
     private function getToken(Request $request): ?string {
-        $authHeader = $request->getHeaderLine("Authorization");
-        return str_replace("Bearer ", "", $authHeader);
+        return $request->getCookieParams()["auth_token"] ?? null;
     }
 
     private function decodeToken(string $token): ?int {
