@@ -41,7 +41,7 @@ class AuthController {
             "",               // Domain (blank is current)
             false,            // "Secure" flag (send over HTTPS only, MUST BE "TRUE" FOR PRODUCTION!)
             true              // "HttpOnly" flag (prevents accessing with JS)
-        )
+        );
 
         return ResponseHelper::handle($response, ["message" => "User logged in!"]);
     }

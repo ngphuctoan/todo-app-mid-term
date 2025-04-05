@@ -60,6 +60,7 @@ class TodoController {
         return Todo::update($userId, $todoId, [
             "title" => $data["title"],
             "description" => $data["description"] ?? null,
+            "is_completed" => $data["is_completed"] ?? false,
             "reminder" => $data["reminder"] ?? null
         ])
             ? $this->get($request, $response, ["id" => $todoId])
@@ -81,6 +82,7 @@ class TodoController {
         return Todo::update($userId, $todoId, [
             "title" => $data["title"] ?? $oldTodo["title"],
             "description" => $data["description"] ?? $oldTodo["description"],
+            "is_completed" => $data["is_completed"] ?? $oldTodo["is_completed"],
             "reminder" => $data["reminder"] ?? $oldTodo["reminder"]
         ])
             ? $this->get($request, $response, ["id" => $todoId])

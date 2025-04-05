@@ -9,7 +9,7 @@ class Todo {
         $pdo = Database::connect();
 
         $getStmt = $pdo->prepare("
-            select id, title, description, reminder from todos
+            select id, title, description, is_completed, reminder from todos
             where id = :todo_id and user_id = :user_id
         ");
         $getStmt->execute([
@@ -24,7 +24,7 @@ class Todo {
         $pdo = Database::connect();
 
         $getStmt = $pdo->prepare("
-            select id, title, description, reminder from todos
+            select id, title, description, is_completed, reminder from todos
             where user_id = :user_id
             order by case when reminder is null then 1 else 0 end, reminder
         ");
@@ -37,13 +37,14 @@ class Todo {
         $pdo = Database::connect();
 
         $createStmt = $pdo->prepare("
-            insert into todos (user_id, title, description, reminder)
-            values (:user_id, :title, :description, :reminder)
+            insert into todos (user_id, title, description, is_completed, reminder)
+            values (:user_id, :title, :description, :is_completed, :reminder)
         ");
         return $createStmt->execute([
             "user_id" => $userId,
             "title" => $data["title"],
             "description" => $data["description"] ?? null,
+            "is_completed" => false,
             "reminder" => $data["reminder"] ?? null
         ]) ? $pdo->lastInsertId() : null;
     }
@@ -53,7 +54,7 @@ class Todo {
 
         $createStmt = $pdo->prepare("
             update todos
-            set title = :title, description = :description, reminder = :reminder
+            set title = :title, description = :description, is_completed = :is_completed, reminder = :reminder
             where id = :todo_id and user_id = :user_id
         ");
         return $createStmt->execute([
@@ -61,6 +62,7 @@ class Todo {
             "todo_id" => $todoId,
             "title" => $data["title"] ?? null,
             "description" => $data["description"] ?? null,
+            "is_completed" => $data["is_completed"],
             "reminder" => $data["reminder"] ?? null
         ]);
     }
