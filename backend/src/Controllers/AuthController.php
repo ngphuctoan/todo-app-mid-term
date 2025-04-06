@@ -21,7 +21,29 @@ class AuthController {
             return ResponseHelper::handle($response, ["error" => "Invalid username or password."], 401);
         }
 
-        return ResponseHelper::handle($response, ["token" => $this->generateJwt($user["name"])]);
+        $authToken = $this->generateJwt($user["id"]);
+
+        /*
+            "Secure" flag is turned off for DEMO PURPOSES ONLY!
+            For production build, PLEASE TURN THIS FLAG ON!!!
+
+            I am SERIOUS, this is SUPER CRITICAL for security ><
+
+            Note that cookies will ONLY send over HTTPS with this flag on,
+            so a certificate is a MUST! (Let's Encrypt certificate is free :3)
+        */
+
+        setcookie(
+            "auth_token",     // Cookie name
+            $authToken,       // JWT auth token
+            time() + 604800,  // Expiration time (1 week)
+            "/",              // Path
+            "",               // Domain (blank is current)
+            false,            // "Secure" flag (send over HTTPS only, MUST BE "TRUE" FOR PRODUCTION!)
+            true              // "HttpOnly" flag (prevents accessing with JS)
+        );
+
+        return ResponseHelper::handle($response, ["message" => "User logged in!"]);
     }
 
     public function register(Request $request, Response $response): Response {
@@ -38,12 +60,12 @@ class AuthController {
             : ResponseHelper::handle($response, ["error" => "Cannot create user."], 500);
     }
 
-    private function generateJwt(string $userName): string {
+    private function generateJwt(string $userId): string {
         $issuedAt = time();
         $expiresAt = $issuedAt + 604800;
 
         return JWT::encode([
-            "sub" => $userName,
+            "sub" => $userId,
             "iat" => $issuedAt,
             "exp" => $expiresAt
         ], $_ENV["JWT_SECRET_KEY"], "HS256");

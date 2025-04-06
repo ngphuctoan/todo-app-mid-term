@@ -5,9 +5,22 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <script src="https://unpkg.com/axios"></script>
         <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
+
+        <script src="./js/main.js"></script>
     </head>
     <body>
-        <h1>Hello, world!</h1>
+        <div x-data="app">
+            <ul>
+                <template x-for="todo in todos">
+                    <li>
+                        <span x-text="todo.title"></span>
+                        <p x-text="todo.description"></p>
+                    </li>
+                </template>
+            </ul>
+        </div>
     </body>
 </html>
