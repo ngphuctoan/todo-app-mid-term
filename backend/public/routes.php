@@ -28,7 +28,7 @@ return function (App $app) {
             $todoGroup->put("/{id}", [TodoController::class, "replace"]);
             $todoGroup->patch("/{id}", [TodoController::class, "update"]);
             $todoGroup->delete("/{id}", [TodoController::class, "delete"]);
-        })->add(JwtMiddleware::class);
+        });
     });
 }
 ?>

@@ -1,9 +1,22 @@
 <?php
 require __DIR__ . "/../../vendor/autoload.php";
 
-use Slim\Factory\AppFactory;
+use App\Controllers\TodoController;
 
-$app = AppFactory::create();
+use DI\ContainerBuilder;
+use DI\Bridge\Slim\Bridge;
+use Slim\Psr7\Factory\ResponseFactory;
+use Psr\Http\Message\ResponseFactoryInterface;
+
+$containerBuilder = new ContainerBuilder();
+$container = $containerBuilder->build();
+
+$container->set(ResponseFactoryInterface::class, ResponseFactory::class);
+$container->set(TodoController::class, function ($container) {
+    return new TodoController($container->get(ResponseFactoryInterface::class));
+});
+
+$app = Bridge::create($container);
 
 (require __DIR__ . "/routes.php")($app);
 

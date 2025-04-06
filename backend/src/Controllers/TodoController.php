@@ -10,6 +10,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 class TodoController {
     public function get(Request $request, Response $response, array $args): Response {
         $userId = $request->getAttribute("user_id");
+        if (!$userId)
+            return $response;
 
         $todoId = (int) $args["id"];
         if (!$todoId)
@@ -23,6 +25,8 @@ class TodoController {
 
     public function getAll(Request $request, Response $response): Response {
         $userId = $request->getAttribute("user_id");
+        if (!$userId)
+            return $response;
 
         $todos = Todo::findAll($userId);
         return ResponseHelper::handle($response, $todos);
@@ -30,6 +34,9 @@ class TodoController {
 
     public function create(Request $request, Response $response): Response {
         $userId = $request->getAttribute("user_id");
+        if (!$userId)
+            return $response;
+
         $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
         if (empty($data["title"]))
@@ -48,6 +55,9 @@ class TodoController {
 
     public function replace(Request $request, Response $response, array $args): Response {
         $userId = $request->getAttribute("user_id");
+        if (!$userId)
+            return $response;
+
         $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
         $todoId = (int) $args["id"];
@@ -69,6 +79,9 @@ class TodoController {
 
     public function update(Request $request, Response $response, array $args): Response {
         $userId = $request->getAttribute("user_id");
+        if (!$userId)
+            return $response;
+
         $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
         $todoId = (int) $args["id"];
@@ -91,6 +104,8 @@ class TodoController {
 
     public function delete(Request $request, Response $response, array $args): Response {
         $userId = $request->getAttribute("user_id");
+        if (!$userId)
+            return $response;
 
         $todoId = (int) $args["id"];
         if (!$todoId)
