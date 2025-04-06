@@ -1,7 +1,6 @@
 <?php
 namespace App\Middlewares;
 
-use App\Utils\Database;
 use App\Utils\ResponseHelper;
 
 use Firebase\JWT\JWT;
@@ -9,11 +8,12 @@ use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ResponseFactoryInterface;
+
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface as Handler;
 
 class JwtMiddleware implements MiddlewareInterface {
     private ResponseFactoryInterface $responseFactory;
@@ -24,13 +24,13 @@ class JwtMiddleware implements MiddlewareInterface {
 
     public function process(Request $request, Handler $handler): Response {
         $token = $this->getToken($request);
-        if (!$token) {
-            return $this->redirectToLogin();
+        if (empty($token)) {
+            return $this->unauthorisedMessage();
         }
 
         $userId = $this->decodeToken($token);
-        if (!$userId) {
-            return $this->redirectToLogin();
+        if (empty($userId)) {
+            return $this->unauthorisedMessage();
         }
 
         $request = $request->withAttribute("user_id", $userId);
@@ -50,9 +50,9 @@ class JwtMiddleware implements MiddlewareInterface {
         }
     }
 
-    private function redirectToLogin(): Response {
-        $response = $this->responseFactory->createResponse(302);
-        return $response->withHeader("Location", "/login");
+    private function unauthorisedMessage(string $message = "Unauthorised."): Response {
+        $response = $this->responseFactory->createResponse();
+        return ResponseHelper::jsonResponse($response, ["error" => "Unauthorised."], 401);
     }
 }
 ?>

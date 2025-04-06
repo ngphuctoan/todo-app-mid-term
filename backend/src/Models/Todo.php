@@ -11,6 +11,7 @@ class Todo {
         $getStmt = $pdo->prepare("
             select id, title, description, is_completed, reminder from todos
             where id = :todo_id and user_id = :user_id
+            limit 1
         ");
         $getStmt->execute([
             "todo_id" => $todoId,
@@ -46,7 +47,9 @@ class Todo {
             "description" => $data["description"] ?? null,
             "is_completed" => false,
             "reminder" => $data["reminder"] ?? null
-        ]) ? $pdo->lastInsertId() : null;
+        ])
+            ? (int) $pdo->lastInsertId()
+            : null;
     }
 
     public static function update(int $userId, int $todoId, array $data): bool {

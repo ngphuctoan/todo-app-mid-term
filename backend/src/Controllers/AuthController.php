@@ -13,12 +13,12 @@ class AuthController {
     public function login(Request $request, Response $response): Response {
         $data = json_decode($request->getBody()->getContents(), true) ?? [];
         if (empty($data["user"]) || empty($data["pass"])) {
-            return ResponseHelper::handle($response, ["error" => "No username/password provided."], 400);
+            return ResponseHelper::jsonResponse($response, ["error" => "Username and password required."], 400);
         }
 
         $user = User::findByName($data["user"]);
         if (!$user || !password_verify($data["pass"], $user["pass"])) {
-            return ResponseHelper::handle($response, ["error" => "Invalid username or password."], 401);
+            return ResponseHelper::jsonResponse($response, ["error" => "Invalid credentials."], 401);
         }
 
         $authToken = $this->generateJwt($user["id"]);
@@ -43,21 +43,21 @@ class AuthController {
             true              // "HttpOnly" flag (prevents accessing with JS)
         );
 
-        return ResponseHelper::handle($response, ["message" => "User logged in!"]);
+        return ResponseHelper::jsonResponse($response, ["message" => "Logged in successfully!"]);
     }
 
     public function register(Request $request, Response $response): Response {
-        $data = json_decode($request->getBody()->getContents(), true);
-        if (!isset($data["user"]) || !isset($data["pass"])) {
-            return ResponseHelper::handle($response, ["error" => "No username/password provided."], 400);
+        $data = json_decode($request->getBody()->getContents(), true) ?? [];
+        if (empty($data["user"]) || empty($data["pass"])) {
+            return ResponseHelper::jsonResponse($response, ["error" => "Username and password required."], 400);
         }
         if (User::findByName($data["user"])) {
-            return ResponseHelper::handle($response, ["error" => "Username already exists."], 400);
+            return ResponseHelper::jsonResponse($response, ["error" => "Username already exists."], 409);
         }
 
         return User::create($data["user"], $data["pass"])
-            ? ResponseHelper::handle($response, ["message" => "User has been created!"], 201)
-            : ResponseHelper::handle($response, ["error" => "Cannot create user."], 500);
+            ? ResponseHelper::jsonResponse($response, ["message" => "User registered successfully!"], 201)
+            : ResponseHelper::jsonResponse($response, ["error" => "An error occurred while creating the user."], 500);
     }
 
     private function generateJwt(string $userId): string {

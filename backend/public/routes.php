@@ -14,7 +14,7 @@ use Slim\Routing\RouteCollectorProxy as Group;
 return function (App $app) {
     $app->group("/api", function (Group $appGroup) {
         $appGroup->get("[/]", function (Request $request, Response $response) {
-            return ResponseHelper::handle($response, ["message" => "Nothing to see here :3"]);
+            return ResponseHelper::jsonResponse($response, ["message" => "Nothing to see here :3"]);
         });
 
         $appGroup->post("/login", [AuthController::class, "login"]);
@@ -28,7 +28,7 @@ return function (App $app) {
             $todoGroup->put("/{id}", [TodoController::class, "replace"]);
             $todoGroup->patch("/{id}", [TodoController::class, "update"]);
             $todoGroup->delete("/{id}", [TodoController::class, "delete"]);
-        });
+        })->add(new JwtMiddleware($appGroup->getResponseFactory()));
     });
 }
 ?>

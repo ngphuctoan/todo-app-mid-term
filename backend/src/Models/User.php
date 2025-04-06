@@ -10,6 +10,7 @@ class User {
         $findStmt = $pdo->prepare("
             select * from users
             where name = :name
+            limit 1
         ");
         $findStmt->execute(["name" => $name]);
 
