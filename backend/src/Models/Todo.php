@@ -38,14 +38,13 @@ class Todo {
         $pdo = Database::connect();
 
         $createStmt = $pdo->prepare("
-            insert into todos (user_id, title, description, is_completed, reminder)
-            values (:user_id, :title, :description, :is_completed, :reminder)
+            insert into todos (user_id, title, description, reminder)
+            values (:user_id, :title, :description, :reminder)
         ");
         return $createStmt->execute([
             "user_id" => $userId,
             "title" => $data["title"],
             "description" => $data["description"] ?? null,
-            "is_completed" => false,
             "reminder" => $data["reminder"] ?? null
         ])
             ? (int) $pdo->lastInsertId()
