@@ -5,15 +5,21 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <script src="https://unpkg.com/dayjs@1"></script>
+
+        <script src="https://unpkg.com/flatpickr"></script>
+        <link rel="stylesheet" href="https://unpkg.com/flatpickr/dist/flatpickr.min.css">
+
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway">
 
         <script src="https://unpkg.com/axios"></script>
         <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 
         <script src="./js/main.js"></script>
     </head>
-    <body class="min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
+    <body class="font-[Raleway] min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
         <div x-data="app" class="relative z-10">
 
             <header class="sticky top-0 bg-black/50 border-b border-gray-500">
@@ -31,7 +37,7 @@
                         <span class="ms-2">Đang sao lưu...</span>
                     </button> -->
 
-                    <button class="px-4 py-2 bg-green-600/25 border border-green-600/50 rounded">
+                    <button class="truncate px-4 py-2 bg-green-600/25 border border-green-600/50 rounded">
                         <iconify-icon inline icon="fa6-regular:circle-check"></iconify-icon>
                         <span class="ms-2">Sao lưu thành công!</span>
                     </button>
@@ -41,9 +47,9 @@
                         <span class="ms-2">Không có kết nối mạng!</span>
                     </button> -->
 
-                    <button class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
+                    <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded">
                         <iconify-icon inline icon="fa6-solid:arrow-right-from-bracket"></iconify-icon>
-                        <span class="ms-2">Đăng xuất</span>
+                        <span class="max-sm:hidden ms-2">Đăng xuất</span>
                     </button>
 
                 </div>
@@ -55,80 +61,215 @@
                     Xin chào, <span x-text="localStorage.getItem('user')" class="text-blue-500"></span>!
                 </h1>
 
-                <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-8">
+                <form
+                    @submit.prevent="
+                        const data = new FormData($el);
+                        const payload = {};
+                        data.forEach((value, key) => payload[key] = value || undefined);
+                        await addTodo(payload);
+                        $el.reset();
+                    "
+                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-8"
+                >
 
                     <input
                         type="text"
+                        name="title"
                         placeholder="Bạn muốn thêm lời nhắc gì không...?"
-                        class="col-span-1 sm:col-span-2 px-4 py-2 bg-white/25 border border-white/50 outline-none rounded"
+                        class="col-span-1 sm:col-span-2 px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                     >
 
                     <input
-                        type="datetime-local"
-                        class="px-4 py-2 bg-white/25 border border-white/50 outline-none rounded"
+                        name="reminder"
+                        x-init="flatpickr($el, flatpickrOptions)"
+                        placeholder="Chọn thời gian..."
+                        class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                     >
 
-                    <button class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
-                        <iconify-icon inline icon="fa6-regular:paper-plane"></iconify-icon>
+                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
+                        <iconify-icon inline icon="fa6-solid:plus"></iconify-icon>
                         <span class="ms-2">Thêm lời nhắc!</span>
                     </button>
 
                 </form>
 
-                <ul class="space-y-2">
+                <ul x-show="todos.length > 0" class="space-y-2">
                     <template x-for="todo in todos">
-                        <li class="p-2 bg-black/50 border border-gray-500 rounded">
+                        <li
+                            x-data="{ isEdit: false }"
+                            @edit="
+                                isEdit = $event.detail;
 
-                            <div class="flex items-center gap-2">
+                                const form = $el.querySelector('form');
+                                form['title'].value = isEdit ? todo.title : '';
+                                form['description'].value = isEdit ? todo.description : '';
+                                form['reminder']._flatpickr.setDate(isEdit ? todo.reminder : '');
+                            "
+                            class="p-2 bg-black/50 border border-gray-500 rounded"
+                        >
 
-                                <button
-                                    @click="await changeState(todo.id, todo.is_completed ? 0 : 1)"
-                                    class="w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25"
-                                >
-                                    <iconify-icon
-                                        inline
-                                        :icon="`fa6-${
-                                            todo.is_completed
-                                                ? 'solid:square-check'
-                                                : 'regular:square'
-                                        }`"
-                                        width="1rem" height="1rem"
-                                        :class="{ 'text-blue-500': todo.is_completed }"
-                                    ></iconify-icon>
-                                </button>
+                            <div>
+                                <div class="flex items-center gap-2">
 
-                                <h3
-                                    x-text="todo.title"
-                                    class="font-bold truncate"
-                                    :class="{ 'line-through': todo.is_completed }"
-                                ></h3>
+                                    <button
+                                        @click="await updateTodo(todo.id, { isCompleted: !todo.isCompleted })"
+                                        class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25"
+                                    >
+                                        <iconify-icon
+                                            inline
+                                            :icon="`fa6-${
+                                                todo.isCompleted
+                                                    ? 'solid:square-check'
+                                                    : 'regular:square'
+                                            }`"
+                                            width="1rem" height="1rem"
+                                            :class="{ 'text-blue-500': todo.isCompleted }"
+                                        ></iconify-icon>
+                                    </button>
 
-                                <div class="flex-1"></div>
+                                    <h3
+                                        x-text="todo.title"
+                                        class="font-bold truncate"
+                                        :class="{ 'line-through': todo.isCompleted }"
+                                    ></h3>
 
-                                <template x-if="todo.reminder">
-                                    <span x-text="todo.reminder" class="truncate"></span>
-                                </template>
+                                    <div class="flex-1"></div>
 
-                                <button class="w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25">
-                                    <iconify-icon inline icon="fa6-solid:ellipsis-vertical" width="1rem" height="1rem"></iconify-icon>
-                                </button>
-                                
+                                    <span
+                                        x-show="todo.reminder"
+                                        x-text="dayjs(todo.reminder).format('MMMM D, YYYY HH:mm')"
+                                        class="truncate"
+                                    ></span>
+
+                                    <div
+                                        x-data="{ open: false }"
+                                        @toggle="open = !open" class="relative"
+                                    >
+
+                                        <button @click="$dispatch('toggle')" class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25">
+                                            <iconify-icon inline icon="fa6-solid:ellipsis-vertical" width="1rem" height="1rem"></iconify-icon>
+                                        </button>
+
+                                        <div x-show="open" x-transition.origin.top.right class="absolute -right-5 py-2 bg-white rounded shadow z-20">
+                                            <ul class="min-w-48 w-max">
+
+                                                <li
+                                                    @click="
+                                                        $dispatch('toggle');
+                                                        $dispatch('edit', true);
+                                                    "
+                                                    class="px-4 py-2 cursor-pointer text-black hover:bg-gray-200"
+                                                >
+                                                    <iconify-icon inline icon="fa6-regular:pen-to-square"></iconify-icon>
+                                                    <span class="ms-2">Chỉnh sửa lời nhắc</span>
+                                                </li>
+
+                                                <li
+                                                    @click="
+                                                        if (confirm(`Bạn muốn xóa lời nhắc &quot;${todo.title}&quot;?`)) {
+                                                            await deleteTodo(todo.id);
+                                                        }
+                                                        $dispatch('toggle');
+                                                    "
+                                                    class="px-4 py-2 cursor-pointer text-red-600 hover:bg-red-100"
+                                                >
+                                                    <iconify-icon inline icon="fa6-regular:trash-can"></iconify-icon>
+                                                    <span class="ms-2">Xóa lời nhắc</span>
+                                                </li>
+
+                                            </ul>
+                                        </div>
+
+                                        <div x-show="open" @click="$dispatch('toggle')" class="fixed inset-0 z-10"></div>
+
+                                    </div>
+                                    
+                                </div>
+
+                                <p x-text="todo.description" class="pt-2 mx-2 mt-2 border-t border-gray-500 empty:p-0 empty:m-0 empty:border-none"></p>
+
                             </div>
 
-                            <template x-if="todo.description">
-                                <hr class="m-2 border-gray-500">
-                            </template>
+                            <form
+                                x-show="isEdit"
+                                @submit.prevent="
+                                    const data = new FormData($el);
+                                    const payload = {};
+                                    data.forEach((value, key) => payload[key] = value || undefined);
+                                    await updateTodo(todo.id, payload);
+                                    $el.reset();
+                                "
+                                @reset="$dispatch('edit', false)"
+                                class="flex flex-col gap-2 px-2 my-2"
+                            >
 
-                            <p x-text="todo.description" class="mx-2"></p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        placeholder="Tiêu đề"
+                                        class="md:col-span-2 font-bold px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
+                                    >
+
+                                    <input
+                                        name="reminder"
+                                        x-init="flatpickr($el, flatpickrOptions)"
+                                        placeholder="Chọn thời gian..."
+                                        class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
+                                    >
+
+                                </div>
+
+                                <textarea
+                                    name="description"
+                                    rows="4"
+                                    placeholder="Mô tả"
+                                    class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
+                                    style="resize: none"
+                                ></textarea>
+
+                                <div class="flex gap-2 mt-2">
+
+                                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
+                                        <iconify-icon inline icon="fa6-solid:check"></iconify-icon>
+                                        <span class="ms-2">Đồng ý</span>
+                                    </button>
+
+                                    <button type="reset" class="px-4 py-2 bg-white/25 border border-white/50 rounded">
+                                        <iconify-icon inline icon="fa6-solid:xmark"></iconify-icon>
+                                        <span class="ms-2">Hủy</span>
+                                    </button>
+
+                                </div>
+
+                            </form>
 
                         </li>
                     </template>
                 </ul>
 
+                <div x-show="todos.length === 0" class="flex flex-col items-center gap-8 py-8">
+                    <img src="assets/empty.jpg" class="w-40 brightness-75">
+                    <h3 class="text-2xl italic text-white/50">Không còn lời nhắc nào nữa, bạn có thể chill được rồi!</h3>
+                </div>
+
             </div>
 
         </div>
 
-        <div class="absolute inset-0 bg-black/50 z-0"></div>
+        <div class="absolute inset-0 bg-black/60 z-0"></div>
     </body>
+
+    <script>
+        flatpickrOptions = {
+            enableTime: true,
+            time_24hr: true,
+            altInput: true,
+            altFormat: "F j, Y H:i",
+            dateFormat: "Y-m-d H:i:S",
+            minDate: "today",
+            disableMobile: true
+        }
+    </script>
 </html>

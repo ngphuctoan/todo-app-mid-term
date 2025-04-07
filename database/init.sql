@@ -17,6 +17,6 @@ create table todos (
 );
 
 create table auth_token_blacklist (
-    token text primary key,
+    token varchar(512) primary key,
     expires_at datetime not null
 );

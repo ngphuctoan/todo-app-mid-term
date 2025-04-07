@@ -4,6 +4,8 @@ namespace App\Middlewares;
 use App\Utils\Database;
 use App\Utils\ResponseHelper;
 
+use stdClass;
+
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
@@ -39,7 +41,7 @@ class JwtMiddleware implements MiddlewareInterface {
             return $this->unauthorisedMessage();
         }
 
-        $userId = self::decodeToken($token);
+        $userId = self::decodeToken($token)->sub;
         if (empty($userId)) {
             return $this->unauthorisedMessage();
         }
@@ -48,14 +50,13 @@ class JwtMiddleware implements MiddlewareInterface {
         return $handler->handle($request);
     }
 
-    private static function getToken(Request $request): ?string {
+    public static function getToken(Request $request): ?string {
         return $request->getCookieParams()["auth_token"] ?? null;
     }
 
-    private static function decodeToken(string $token): ?int {
+    public static function decodeToken(string $token): ?stdClass {
         try {
-            $decoded = JWT::decode($token, new Key($_ENV["JWT_SECRET_KEY"], "HS256"));
-            return $decoded->sub ?? null;
+            return JWT::decode($token, new Key($_ENV["JWT_SECRET_KEY"], "HS256"));
         } catch (ExpiredException | SignatureInvalidException $error) {
             return null;
         }

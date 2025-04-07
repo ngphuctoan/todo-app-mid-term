@@ -27,7 +27,6 @@ class Todo {
         $getStmt = $pdo->prepare("
             select id, title, description, is_completed, reminder from todos
             where user_id = :user_id
-            order by case when reminder is null then 1 else 0 end, reminder
         ");
         $getStmt->execute(["user_id" => $userId]);
 

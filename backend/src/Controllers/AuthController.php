@@ -66,7 +66,11 @@ class AuthController {
         $pdo = Database::connect();
 
         $authToken = JwtMiddleware::getToken($request);
-        $payload = JwtMiddleware::decodeToken($request);
+        if (empty($authToken)) {
+            return ResponseHelper::jsonResponse($response, ["message" => "User already logged out."]);
+        }
+
+        $payload = JwtMiddleware::decodeToken($authToken);
 
         $blacklistStmt = $pdo->prepare("
             insert into auth_token_blacklist (token, expires_at)
@@ -79,7 +83,7 @@ class AuthController {
 
         setcookie("auth_token", "", time() - 604800, "/", "", false, true);
 
-        return ResponseHelper::jsonResponse(["message" => "User logged out!"]);
+        return ResponseHelper::jsonResponse($response, ["message" => "User logged out!"]);
     }
 
     private function generateJwt(string $userId): string {

@@ -50,6 +50,10 @@
     </div>
 
     <script>
+        if (localStorage.getItem("user")) {
+            window.location.pathname = "/";
+        }
+
         const logInForm = document.forms["logIn"];
 
         logInForm.onsubmit = async (event) => {
