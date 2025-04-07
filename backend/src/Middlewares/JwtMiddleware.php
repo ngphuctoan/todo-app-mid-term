@@ -1,7 +1,10 @@
 <?php
 namespace App\Middlewares;
 
+use App\Utils\Database;
 use App\Utils\ResponseHelper;
+
+use stdClass;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -23,12 +26,22 @@ class JwtMiddleware implements MiddlewareInterface {
     }
 
     public function process(Request $request, Handler $handler): Response {
-        $token = $this->getToken($request);
+        $token = self::getToken($request);
         if (empty($token)) {
             return $this->unauthorisedMessage();
         }
 
-        $userId = $this->decodeToken($token);
+        $pdo = Database::connect();
+        $checkStmt = $pdo->prepare("
+            select 1 from auth_token_blacklist
+            where token = :token and expires_at > NOW()
+        ");
+        $checkStmt->execute(["token" => $token]);
+        if ($checkStmt->fetch()) {
+            return $this->unauthorisedMessage();
+        }
+
+        $userId = self::decodeToken($token)->sub;
         if (empty($userId)) {
             return $this->unauthorisedMessage();
         }
@@ -37,14 +50,13 @@ class JwtMiddleware implements MiddlewareInterface {
         return $handler->handle($request);
     }
 
-    private function getToken(Request $request): ?string {
+    public static function getToken(Request $request): ?string {
         return $request->getCookieParams()["auth_token"] ?? null;
     }
 
-    private function decodeToken(string $token): ?int {
+    public static function decodeToken(string $token): ?stdClass {
         try {
-            $decoded = JWT::decode($token, new Key($_ENV["JWT_SECRET_KEY"], "HS256"));
-            return $decoded->sub ?? null;
+            return JWT::decode($token, new Key($_ENV["JWT_SECRET_KEY"], "HS256"));
         } catch (ExpiredException | SignatureInvalidException $error) {
             return null;
         }

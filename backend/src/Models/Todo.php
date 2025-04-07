@@ -27,7 +27,6 @@ class Todo {
         $getStmt = $pdo->prepare("
             select id, title, description, is_completed, reminder from todos
             where user_id = :user_id
-            order by case when reminder is null then 1 else 0 end, reminder
         ");
         $getStmt->execute(["user_id" => $userId]);
 
@@ -38,14 +37,13 @@ class Todo {
         $pdo = Database::connect();
 
         $createStmt = $pdo->prepare("
-            insert into todos (user_id, title, description, is_completed, reminder)
-            values (:user_id, :title, :description, :is_completed, :reminder)
+            insert into todos (user_id, title, description, reminder)
+            values (:user_id, :title, :description, :reminder)
         ");
         return $createStmt->execute([
             "user_id" => $userId,
             "title" => $data["title"],
             "description" => $data["description"] ?? null,
-            "is_completed" => false,
             "reminder" => $data["reminder"] ?? null
         ])
             ? (int) $pdo->lastInsertId()

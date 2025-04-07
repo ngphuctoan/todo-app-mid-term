@@ -2,7 +2,9 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use App\Utils\Database;
 use App\Utils\ResponseHelper;
+use App\Middlewares\JwtMiddleware;
 
 use Firebase\JWT\JWT;
 
@@ -58,6 +60,30 @@ class AuthController {
         return User::create($data["user"], $data["pass"])
             ? ResponseHelper::jsonResponse($response, ["message" => "User registered successfully!"], 201)
             : ResponseHelper::jsonResponse($response, ["error" => "An error occurred while creating the user."], 500);
+    }
+
+    public function logout(Request $request, Response $response): Response {
+        $pdo = Database::connect();
+
+        $authToken = JwtMiddleware::getToken($request);
+        if (empty($authToken)) {
+            return ResponseHelper::jsonResponse($response, ["message" => "User already logged out."]);
+        }
+
+        $payload = JwtMiddleware::decodeToken($authToken);
+
+        $blacklistStmt = $pdo->prepare("
+            insert into auth_token_blacklist (token, expires_at)
+            values (:token, :expires_at)
+        ");
+        $blacklistStmt->execute([
+            "token" => $authToken,
+            "expires_at" => date("Y-m-d H:i:s", $payload->exp)
+        ]);
+
+        setcookie("auth_token", "", time() - 604800, "/", "", false, true);
+
+        return ResponseHelper::jsonResponse($response, ["message" => "User logged out!"]);
     }
 
     private function generateJwt(string $userId): string {

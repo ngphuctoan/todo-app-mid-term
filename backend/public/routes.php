@@ -18,6 +18,7 @@ return function (App $app) {
         });
 
         $appGroup->post("/login", [AuthController::class, "login"]);
+        $appGroup->post("/logout", [AuthController::class, "logout"]);
         $appGroup->post("/register", [AuthController::class, "register"]);
 
         $appGroup->group("/todos", function (Group $todoGroup) {

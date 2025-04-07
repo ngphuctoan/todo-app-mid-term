@@ -15,3 +15,8 @@ create table todos (
     user_id int,
     foreign key (user_id) references users(id) on delete cascade
 );
+
+create table auth_token_blacklist (
+    token varchar(512) primary key,
+    expires_at datetime not null
+);
