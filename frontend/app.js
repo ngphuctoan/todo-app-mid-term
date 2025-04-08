@@ -1,19 +1,9 @@
-flatpickrOptions = {
-    enableTime: true,
-    time_24hr: true,
-    altInput: true,
-    altFormat: "F j, Y H:i",
-    dateFormat: "Y-m-d H:i:S",
-    minDate: "today",
-    disableMobile: true
-}
-
 document.addEventListener("alpine:init", () => {
     Alpine.data("app", () => ({
         todos: [],
 
         init() {
-            this.fetchTodos().catch(async () => await this.logOut());
+            this.fetchTodos();
         },
 
         parseTodo(todoData) {
@@ -54,16 +44,36 @@ document.addEventListener("alpine:init", () => {
         async deleteTodo(id) {
             await axios.delete(`/api/todos/${id}`);
             this.todos = this.todos.filter(todo => todo.id !== id);
-        },
-
-        async logOut() {
-            await axios.post("/api/logout");
-            localStorage.removeItem("user");
-            this.redirectToLogin();
-        },
-
-        redirectToLogin() {
-            window.location.pathname = "/login";
         }
     }));
 });
+
+async function logOut() {
+    await axios.post("/api/logout");
+    localStorage.removeItem("user");
+    this.redirectToLogin();
+}
+
+function redirectToLogin() {
+    window.location.pathname = "/login";
+}
+
+flatpickrOptions = {
+    enableTime: true,
+    time_24hr: true,
+    altInput: true,
+    altFormat: "F j, Y H:i",
+    dateFormat: "Y-m-d H:i:S",
+    minDate: "today",
+    disableMobile: true
+}
+
+axios.interceptors.response.use(
+    null,
+    async error => {
+        if (error.response?.status === 401) {
+            await logOut();
+        }
+        return Promise.reject(error);
+    }
+)

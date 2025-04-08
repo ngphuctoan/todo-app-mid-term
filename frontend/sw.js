@@ -17,13 +17,27 @@ self.addEventListener("install", event => {
         caches.open(CACHE_NAME).then(
             cache => cache.addAll(APP_ASSETS)
         )
-    )
+    );
 });
 
 self.addEventListener("fetch", event => {
+    const url = new URL(event.request.url);
+
+    // Blocks API requests from the PHP-FPM server.
+    if (url.pathname.startsWith("/api") && !self.navigator.onLine) {
+        event.respondWith(new Response(
+            JSON.stringify({ error: "You are offline!" }),
+            {
+                status: 503,
+                headers: { "Content-Type": "application/json" }
+            }
+        ));
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request).then(
             cachedResponse => cachedResponse || fetch(event.request)
         )
-    )
+    );
 });
