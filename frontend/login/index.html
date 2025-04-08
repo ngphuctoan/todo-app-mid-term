@@ -11,22 +11,22 @@
 </head>
     <style>
         .font-dancing {
-        font-family: 'Dancing Script', cursive;
+            font-family: 'Dancing Script', cursive;
         }
     </style>
 <body>
     <div class="bg-gray-100 h-screen flex justify-center items-center">
-        <div class="flex w-full max-w-7xl bg-white shadow-md rounded-lg ">
-            <!-- Phía bên trái: Hiển thị icon -->
-            <div class="w-1/2 bg-blue-100 text-white flex justify-center items-center rounded-l-lg flex-col">
-                <!-- Icon "book" thay vì "notebook" -->
-                <div class="flex justify-center items-center w-72 h-72 border-8 border-blue-300 rounded-full">
-                    <i class="fas fa-book text-9xl scale-150 text-sky-300"></i>
+        <div class="flex flex-col md:flex-row w-full max-w-7xl bg-white shadow-md rounded-lg">
+            <!-- Left -->
+            <div class="w-full md:w-1/2 bg-blue-100 text-white flex justify-center items-center rounded-t-lg md:rounded-l-lg md:rounded-t-none flex-col p-4">
+                <!-- Icon -->
+                <div class="flex justify-center items-center w-48 h-48 md:w-72 md:h-72 border-8 border-blue-300 rounded-full">
+                    <i class="fas fa-book text-6xl md:text-9xl scale-150 text-sky-300"></i>
                 </div>
-                <span class="font-dancing text-4xl mt-4">Note Book</span> <!-- Dùng font Dancing Script -->
+                <span class="font-dancing text-3xl md:text-4xl mt-4 text-blue-800">Note Book</span> <!-- Dùng font Dancing Script -->
             </div>
-            <!-- Phía bên phải: Form đăng nhập -->
-            <div class="w-1/2 p-8">
+            <!-- Right-->
+            <div class="w-full md:w-1/2 p-6 md:p-8">
                 <h2 class="text-3xl font-bold text-center mb-6">Đăng Nhập</h2>
         
                 <form id="logIn">
