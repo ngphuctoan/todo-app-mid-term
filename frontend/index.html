@@ -19,7 +19,7 @@
         <script src="https://unpkg.com/axios"></script>
         <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 
-        <script src="/js/main.js"></script>
+        <script src="/app.js"></script>
     </head>
     <body class="font-[Raleway] min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
         <div x-data="app" class="relative z-10">
@@ -264,14 +264,8 @@
     </body>
 
     <script>
-        flatpickrOptions = {
-            enableTime: true,
-            time_24hr: true,
-            altInput: true,
-            altFormat: "F j, Y H:i",
-            dateFormat: "Y-m-d H:i:S",
-            minDate: "today",
-            disableMobile: true
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
         }
     </script>
 </html>

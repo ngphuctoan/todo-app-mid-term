@@ -1,3 +1,13 @@
+flatpickrOptions = {
+    enableTime: true,
+    time_24hr: true,
+    altInput: true,
+    altFormat: "F j, Y H:i",
+    dateFormat: "Y-m-d H:i:S",
+    minDate: "today",
+    disableMobile: true
+}
+
 document.addEventListener("alpine:init", () => {
     Alpine.data("app", () => ({
         todos: [],
