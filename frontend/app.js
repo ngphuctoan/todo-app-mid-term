@@ -126,7 +126,7 @@ document.addEventListener("alpine:init", () => {
 async function logOut() {
     await axios.post("/api/logout");
     localStorage.removeItem("user");
-    this.redirectToLogin();
+    redirectToLogin();
 }
 
 function redirectToLogin() {
