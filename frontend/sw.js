@@ -1,5 +1,7 @@
 const VERSION = "v1";
-const CACHE_NAME = `todo-app-${VERSION}`;
+
+const APP_CACHE = `todo-app-${VERSION}`;
+const UNPKG_CACHE = `todo-unpkg-${VERSION}`;
 
 const APP_ASSETS = [
     "/",
@@ -24,18 +26,17 @@ const UNPKG_CDNS = [
     "flatpickr/dist/flatpickr.min.css",
     "axios",
     "alpinejs@3.x.x",
+    "@alpinejs/persist@3.x.x",
     "@tailwindcss/browser@4"
 ].map(package => `https://unpkg.com/${package}`);
 
-const persistentCacheNames = [ CACHE_NAME, "sync-data" ];
-const appCaches = [...APP_ASSETS, ...UNPKG_CDNS];
+const persistentCacheNames = [APP_CACHE, UNPKG_CACHE, "sync-data"];
 
 self.addEventListener("install", event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(
-            cache => cache.addAll(appCaches)
-        )
-    );
+    event.waitUntil(Promise.all([
+        caches.open(APP_CACHE).then(cache => cache.addAll(APP_ASSETS)),
+        caches.open(UNPKG_CACHE).then(cache => cache.addAll(UNPKG_CDNS))
+    ]));
 });
 
 self.addEventListener("activate", event => {
@@ -53,6 +54,16 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
     const url = new URL(event.request.url);
 
+    if (url.origin.includes("unpkg.com")) {
+        event.respondWith(
+            caches.open(UNPKG_CACHE).then(
+                cache => cache.match(event.request).then(
+                    cachedResponse => cachedResponse || fetch(event.request)
+                )
+            )
+        );
+    }
+
     // Blocks API requests from the PHP-FPM server.
     if (url.pathname.startsWith("/api") && !self.navigator.onLine) {
         event.respondWith(new Response(
@@ -66,8 +77,10 @@ self.addEventListener("fetch", event => {
     }
 
     event.respondWith(
-        caches.match(event.request).then(
-            cachedResponse => cachedResponse || fetch(event.request)
+        caches.open(APP_CACHE).then(cache =>
+            cache.match(event.request).then(
+                cachedResponse => cachedResponse || fetch(event.request)
+            )
         )
     );
 });
