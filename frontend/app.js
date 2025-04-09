@@ -11,6 +11,8 @@ document.addEventListener("alpine:init", () => {
                 });
 
                 this.fetchTodos();
+
+                registerPush();
             },
 
             parseTodo({ id, title, description, is_completed, reminder }) {
@@ -129,6 +131,29 @@ async function logOut() {
 
 function redirectToLogin() {
     window.location.pathname = "/login";
+}
+
+function base64ToUint8Array(message) {
+    const binary = atob(message.replace(/-/g, "+").replace(/_/g, "/"));
+    return Uint8Array.from(binary, char => char.charCodeAt(0));
+}
+
+async function registerPush() {
+    const permission = await Notification.requestPermission();
+    
+    if (permission === "granted") {
+        const { public_key: vapidPublicKey } = await axios
+            .get("/api/push/publickey")
+            .then(response => response.data);
+
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: base64ToUint8Array(vapidPublicKey)
+        });
+
+        await axios.post("/api/push/subscribe", subscription);
+    }
 }
 
 flatpickrOptions = {

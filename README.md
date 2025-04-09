@@ -11,3 +11,9 @@ A todo demo PWA app for Web and App Development's mid-term essay.
     ```
     docker compose up -d
     ```
+
+3. Generate VAPID keys:
+
+    ```
+    docker exec -it php_fpm php tools/generate_vapid_keys.php
+    ```

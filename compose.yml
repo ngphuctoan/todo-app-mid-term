@@ -5,6 +5,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
+      - TZ=Asia/Ho_Chi_Minh
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
       - MYSQL_USER=${DB_USER}

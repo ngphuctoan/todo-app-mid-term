@@ -62,6 +62,7 @@ self.addEventListener("fetch", event => {
                 )
             )
         );
+        return;
     }
 
     // Blocks API requests from the PHP-FPM server.
@@ -81,6 +82,20 @@ self.addEventListener("fetch", event => {
             cache.match(event.request).then(
                 cachedResponse => cachedResponse || fetch(event.request)
             )
+        )
+    );
+});
+
+self.addEventListener("push", event => {
+    const data = event.data?.json() || {};
+
+    event.waitUntil(
+        self.registration.showNotification(
+            data.title || "Reminder",
+            {
+                body: data.body || "You have a todo to finish!",
+                icon: "/assets/icons/192.png"
+            }
         )
     );
 });

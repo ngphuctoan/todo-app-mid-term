@@ -55,7 +55,7 @@ class Todo {
 
         $createStmt = $pdo->prepare("
             update todos
-            set title = :title, description = :description, is_completed = :is_completed, reminder = :reminder
+            set title = :title, description = :description, is_completed = :is_completed, reminder = :reminder, reminder_sent = 0
             where id = :todo_id and user_id = :user_id
         ");
         return $createStmt->execute([
