@@ -5,21 +5,24 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <link rel="manifest" href="/manifest.json">
+
+        <script src="https://unpkg.com/axios"></script>
+
         <script src="https://unpkg.com/dayjs@1"></script>
 
         <script src="https://unpkg.com/flatpickr"></script>
         <link rel="stylesheet" href="https://unpkg.com/flatpickr/dist/flatpickr.min.css">
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway">
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
-        <script src="https://unpkg.com/axios"></script>
+        <script src="https://unpkg.com/@alpinejs/persist@3.x.x" defer></script>
         <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 
-        <script src="./js/main.js"></script>
+        <script src="/app.js"></script>
+        <link rel="stylesheet" href="/assets/css/styles.css">
     </head>
-    <body class="font-[Raleway] min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
+    <body class="font-[Quicksand] min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
         <div x-data="app" class="relative z-10">
 
             <header class="sticky top-0 bg-black/50 border-b border-gray-500">
@@ -27,28 +30,8 @@
 
                     <div class="flex-1"></div>
 
-                    <!-- <button class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded">
-                        <iconify-icon inline icon="fa6-solid:triangle-exclamation"></iconify-icon>
-                        <span class="ms-2">Cẩn thận, bạn chưa sao lưu!</span>
-                    </button> -->
-
-                    <!-- <button class="px-4 py-2 bg-white/25 border border-white/50 rounded">
-                        <iconify-icon inline icon="fa6-solid:spinner"></iconify-icon>
-                        <span class="ms-2">Đang sao lưu...</span>
-                    </button> -->
-
-                    <button class="truncate px-4 py-2 bg-green-600/25 border border-green-600/50 rounded">
-                        <iconify-icon inline icon="fa6-regular:circle-check"></iconify-icon>
-                        <span class="ms-2">Sao lưu thành công!</span>
-                    </button>
-
-                    <!-- <button class="px-4 py-2 bg-red-600/25 border border-red-600/50 rounded">
-                        <iconify-icon inline icon="fa6-solid:link-slash"></iconify-icon>
-                        <span class="ms-2">Không có kết nối mạng!</span>
-                    </button> -->
-
-                    <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded">
-                        <iconify-icon inline icon="fa6-solid:arrow-right-from-bracket"></iconify-icon>
+                    <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded cursor-pointer">
+                        <span class="material-icons">logout</span>
                         <span class="max-sm:hidden ms-2">Đăng xuất</span>
                     </button>
 
@@ -86,8 +69,8 @@
                         class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                     >
 
-                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
-                        <iconify-icon inline icon="fa6-solid:plus"></iconify-icon>
+                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded cursor-pointer">
+                        <span class="material-icons">send</span>
                         <span class="ms-2">Thêm lời nhắc!</span>
                     </button>
 
@@ -113,18 +96,13 @@
 
                                     <button
                                         @click="await updateTodo(todo.id, { isCompleted: !todo.isCompleted })"
-                                        class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25"
+                                        class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25 cursor-pointer"
                                     >
-                                        <iconify-icon
-                                            inline
-                                            :icon="`fa6-${
-                                                todo.isCompleted
-                                                    ? 'solid:square-check'
-                                                    : 'regular:square'
-                                            }`"
-                                            width="1rem" height="1rem"
+                                        <span
+                                            x-text="`check_box${ todo.isCompleted ? '' : '_outline_blank' }`"
+                                            class="material-icons"
                                             :class="{ 'text-blue-500': todo.isCompleted }"
-                                        ></iconify-icon>
+                                        ></span>
                                     </button>
 
                                     <h3
@@ -146,8 +124,8 @@
                                         @toggle="open = !open" class="relative"
                                     >
 
-                                        <button @click="$dispatch('toggle')" class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25">
-                                            <iconify-icon inline icon="fa6-solid:ellipsis-vertical" width="1rem" height="1rem"></iconify-icon>
+                                        <button @click="$dispatch('toggle')" class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25 cursor-pointer">
+                                            <span class="material-icons">more_vert</span>
                                         </button>
 
                                         <div x-show="open" x-transition.origin.top.right class="absolute -right-5 py-2 bg-white rounded shadow z-20">
@@ -160,7 +138,7 @@
                                                     "
                                                     class="px-4 py-2 cursor-pointer text-black hover:bg-gray-200"
                                                 >
-                                                    <iconify-icon inline icon="fa6-regular:pen-to-square"></iconify-icon>
+                                                    <span class="material-icons">edit</span>
                                                     <span class="ms-2">Chỉnh sửa lời nhắc</span>
                                                 </li>
 
@@ -173,7 +151,7 @@
                                                     "
                                                     class="px-4 py-2 cursor-pointer text-red-600 hover:bg-red-100"
                                                 >
-                                                    <iconify-icon inline icon="fa6-regular:trash-can"></iconify-icon>
+                                                    <span class="material-icons">delete</span>
                                                     <span class="ms-2">Xóa lời nhắc</span>
                                                 </li>
 
@@ -231,13 +209,13 @@
 
                                 <div class="flex gap-2 mt-2">
 
-                                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
-                                        <iconify-icon inline icon="fa6-solid:check"></iconify-icon>
+                                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded cursor-pointer">
+                                        <span class="material-icons">check</span>
                                         <span class="ms-2">Đồng ý</span>
                                     </button>
 
-                                    <button type="reset" class="px-4 py-2 bg-white/25 border border-white/50 rounded">
-                                        <iconify-icon inline icon="fa6-solid:xmark"></iconify-icon>
+                                    <button type="reset" class="px-4 py-2 bg-white/25 border border-white/50 rounded cursor-pointer">
+                                        <span class="material-icons">close</span>
                                         <span class="ms-2">Hủy</span>
                                     </button>
 
@@ -260,16 +238,4 @@
 
         <div class="absolute inset-0 bg-black/60 z-0"></div>
     </body>
-
-    <script>
-        flatpickrOptions = {
-            enableTime: true,
-            time_24hr: true,
-            altInput: true,
-            altFormat: "F j, Y H:i",
-            dateFormat: "Y-m-d H:i:S",
-            minDate: "today",
-            disableMobile: true
-        }
-    </script>
 </html>

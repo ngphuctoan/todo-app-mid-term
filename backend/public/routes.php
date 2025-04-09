@@ -5,6 +5,7 @@ use App\Controllers\AuthController;
 use App\Controllers\TodoController;
 use App\Middlewares\JwtMiddleware;
 use App\Utils\ResponseHelper;
+use App\Utils\PushManager;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -29,6 +30,11 @@ return function (App $app) {
             $todoGroup->put("/{id}", [TodoController::class, "replace"]);
             $todoGroup->patch("/{id}", [TodoController::class, "update"]);
             $todoGroup->delete("/{id}", [TodoController::class, "delete"]);
+        })->add(new JwtMiddleware($appGroup->getResponseFactory()));
+
+        $appGroup->group("/push", function (Group $pushGroup) {
+            $pushGroup->get("/publickey", [PushManager::class, "getPublicKey"]);
+            $pushGroup->post("/subscribe", [PushManager::class, "subscribe"]);
         })->add(new JwtMiddleware($appGroup->getResponseFactory()));
     });
 }
