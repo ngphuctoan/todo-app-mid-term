@@ -1,0 +1,13 @@
+@font-face {
+    font-family: "Quicksand";
+    font-style: normal;
+    font-weight: 100 900;
+    src: url(/assets/fonts/quicksand.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: "Material Icons";
+    font-style: normal;
+    font-weight: 400;
+    src: url(/assets/fonts/material_icons.ttf) format("truetype");
+}

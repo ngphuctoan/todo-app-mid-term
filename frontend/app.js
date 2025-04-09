@@ -3,16 +3,28 @@ document.addEventListener("alpine:init", () => {
         todos: [],
 
         init() {
+            navigator.serviceWorker?.addEventListener("message", event => {
+                if (event.data?.type === "sync-complete") {
+                    this.fetchTodos();
+                }
+            });
+
             this.fetchTodos();
         },
 
-        parseTodo(todoData) {
+        parseTodo({ id, title, description, is_completed, reminder }) {
             return {
-                id: todoData.id,
-                title: todoData.title,
-                description: todoData.description,
-                isCompleted: todoData.is_completed === 1,
-                reminder: todoData.reminder ? new Date(todoData.reminder) : undefined
+                id, title, description,
+                isCompleted: is_completed === 1,
+                reminder: reminder ? new Date(reminder) : undefined
+            }
+        },
+
+        jsonifyTodo({ title, description, isCompleted, reminder }) {
+            return {
+                title, description,
+                is_completed: +isCompleted,
+                reminder: reminder ? dayjs(reminder).format("YYYY-MM-DD HH:mm:ss") : undefined
             }
         },
 
@@ -22,31 +34,90 @@ document.addEventListener("alpine:init", () => {
         },
 
         async addTodo({ title, description, reminder }) {
-            const { data: todoData } = await axios.post("/api/todos", { title, description, reminder });
-            this.todos.push(this.parseTodo(todoData));
+            const tempId = Date.now();
+            const newTodo = {
+                id: tempId,
+                title, description,
+                isCompleted: false,
+                reminder
+            }
+
+            this.todos.push(newTodo);
+
+            const payload = this.jsonifyTodo(newTodo);
+
+            try {
+                const { data: todoJson } = await axios.post("/api/todos", payload);
+                this.todos[this._findTodoIndex(tempId)] = this.parseTodo(todoJson);
+            } catch {
+                await queueSync({
+                    action: "create",
+                    id: tempId, todoJson: payload
+                });
+            }
         },
 
         async updateTodo(id, { title, description, isCompleted, reminder }) {
-            const payload = Object.fromEntries(
-                Object.entries({
-                    title,
-                    description,
-                    is_completed: +isCompleted,
-                    reminder
-                }).filter(([, value]) => value !== undefined)
-            );
+            const index = this._findTodoIndex(id);
+            const oldTodo = { ...this.todos[index] };
 
-            const { data: todoData } = await axios.patch(`/api/todos/${id}`, payload);
-            const index = this.todos.findIndex(todo => todo.id === id);
-            this.todos[index] = this.parseTodo(todoData);
+            const newTodo = {
+                ...oldTodo,
+                title, description, isCompleted, reminder
+            }
+
+            this.todos[index] = newTodo;
+
+            const payload = this.jsonifyTodo(newTodo);
+
+            try {
+                const { data: todoJson } = await axios.patch(`/api/todos/${id}`, payload);
+                this.todos[index] = this.parseTodo(todoJson);
+            } catch {
+                await queueSync({
+                    action: "update",
+                    id, todoJson: payload
+                });
+            }
         },
 
         async deleteTodo(id) {
-            await axios.delete(`/api/todos/${id}`);
-            this.todos = this.todos.filter(todo => todo.id !== id);
+            const index = this._findTodoIndex(id);
+            const deletedTodo = this.todos[index];
+
+            this.todos.splice(index, 1);
+
+            try {
+                await axios.delete(`/api/todos/${id}`);
+            } catch {
+                await queueSync({
+                    action: "delete",
+                    id
+                });
+            }
+        },
+
+        _findTodoIndex(id) {
+            return this.todos.findIndex(todo => todo.id === id);
         }
     }));
 });
+
+async function queueSync({ action, id, todoJson }) {
+    const db = await caches.open("sync-data");
+    const response = await db.match("/sync-queue");
+    const queue = response ? await response.json() : [];
+
+    queue.push({ action, id, todoJson });
+
+    await db.put("/sync-queue", new Response(JSON.stringify(queue)));
+    await requestSync();
+}
+
+async function requestSync() {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.sync.register("sync-todos");
+}
 
 async function logOut() {
     await axios.post("/api/logout");
@@ -66,7 +137,7 @@ flatpickrOptions = {
     dateFormat: "Y-m-d H:i:S",
     minDate: "today",
     disableMobile: true
-}
+};
 
 axios.interceptors.response.use(
     null,
@@ -76,4 +147,8 @@ axios.interceptors.response.use(
         }
         return Promise.reject(error);
     }
-)
+);
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+}

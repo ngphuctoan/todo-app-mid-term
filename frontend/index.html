@@ -16,21 +16,12 @@
 
         <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
         <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 
         <script src="/app.js"></script>
-
-        <style>
-            .material-icons {
-                font-size: 1.25rem;
-                vertical-align: -.25rem;
-            }
-        </style>
+        <link rel="stylesheet" href="/assets/css/styles.css">
     </head>
-    <body class="font-[Raleway] min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
+    <body class="font-[Quicksand] min-h-screen relative text-white bg-[url(assets/bg.jpg)] bg-cover bg-fixed bg-no-repeat">
         <div x-data="app" class="relative z-10">
 
             <header class="sticky top-0 bg-black/50 border-b border-gray-500">
@@ -38,7 +29,7 @@
 
                     <div class="flex-1"></div>
 
-                    <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded">
+                    <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded cursor-pointer">
                         <span class="material-icons">logout</span>
                         <span class="max-sm:hidden ms-2">Đăng xuất</span>
                     </button>
@@ -77,7 +68,7 @@
                         class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                     >
 
-                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
+                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded cursor-pointer">
                         <span class="material-icons">send</span>
                         <span class="ms-2">Thêm lời nhắc!</span>
                     </button>
@@ -104,7 +95,7 @@
 
                                     <button
                                         @click="await updateTodo(todo.id, { isCompleted: !todo.isCompleted })"
-                                        class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25"
+                                        class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25 cursor-pointer"
                                     >
                                         <span
                                             x-text="`check_box${ todo.isCompleted ? '' : '_outline_blank' }`"
@@ -132,7 +123,7 @@
                                         @toggle="open = !open" class="relative"
                                     >
 
-                                        <button @click="$dispatch('toggle')" class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25">
+                                        <button @click="$dispatch('toggle')" class="shrink-0 w-8 h-8 rounded-full hover:bg-white/10 active:bg-white/25 cursor-pointer">
                                             <span class="material-icons">more_vert</span>
                                         </button>
 
@@ -217,12 +208,12 @@
 
                                 <div class="flex gap-2 mt-2">
 
-                                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded cursor-pointer">
                                         <span class="material-icons">check</span>
                                         <span class="ms-2">Đồng ý</span>
                                     </button>
 
-                                    <button type="reset" class="px-4 py-2 bg-white/25 border border-white/50 rounded">
+                                    <button type="reset" class="px-4 py-2 bg-white/25 border border-white/50 rounded cursor-pointer">
                                         <span class="material-icons">close</span>
                                         <span class="ms-2">Hủy</span>
                                     </button>
@@ -246,10 +237,4 @@
 
         <div class="absolute inset-0 bg-black/60 z-0"></div>
     </body>
-
-    <script>
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js");
-        }
-    </script>
 </html>
