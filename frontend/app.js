@@ -1,12 +1,23 @@
 document.addEventListener("alpine:init", () => {
     Alpine.data("app", function () {
         return {
+            status: navigator.onLine ? "online" : "offline",
+
             todos: this.$persist([]).as("cached-todo"),
 
             init() {
+                window.ononline = () => this.status = "online";
+                window.onoffline = () => this.status = "offline";
+
                 navigator.serviceWorker?.addEventListener("message", event => {
-                    if (event.data?.type === "sync-complete") {
-                        this.fetchTodos();
+                    const status = event.data?.type;
+
+                    if (status && status.includes("sync-")) {
+                        this.status = status;
+
+                        if (status === "sync-complete") {
+                            this.fetchTodos();
+                        }
                     }
                 });
 
@@ -57,6 +68,8 @@ document.addEventListener("alpine:init", () => {
                         action: "create",
                         id: tempId, todoJson: payload
                     });
+
+                    console.log(...syncLog(`Queued CREATE "${title}" (Temporary ID: ${tempId})"`, "white", "blue", "SYNC"));
                 }
             },
 
@@ -81,6 +94,8 @@ document.addEventListener("alpine:init", () => {
                         action: "update",
                         id, todoJson: payload
                     });
+
+                    console.log(...syncLog(`Queued UPDATE "${title}" (ID: ${id})`, "white", "blue", "SYNC"));
                 }
             },
 
@@ -97,6 +112,8 @@ document.addEventListener("alpine:init", () => {
                         action: "delete",
                         id
                     });
+
+                    console.log(...syncLog(`Queued DELETE "${deletedTodo.title}" (ID: ${id})`, "white", "blue", "SYNC"));
                 }
             },
 
@@ -112,7 +129,7 @@ document.addEventListener("alpine:init", () => {
                 queue.push({ action, id, todoJson });
             
                 await db.put("/sync-queue", new Response(JSON.stringify(queue)));
-                await requestSync();
+                await this.requestSync();
             },
             
             async requestSync() {
@@ -120,6 +137,10 @@ document.addEventListener("alpine:init", () => {
                 await registration.sync.register("sync-todos");
             }
         }
+    });
+
+    Alpine.store("status", {
+        
     });
 });
 
