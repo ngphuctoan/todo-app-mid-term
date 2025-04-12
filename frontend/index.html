@@ -31,19 +31,27 @@
 
                     <div class="flex-1"></div>
 
-                    <div
+                    <button
                         x-data="{
                             'online': { msg: 'Online', icon: 'wifi', colour: 'green' },
                             'offline': { msg: 'Offline', icon: 'wifi_off', colour: 'red' },
                             'sync-progress': { msg: 'Syncing...', icon: 'backup', colour: 'amber' },
-                            'sync-complete': { msg: 'Synced!', icon: 'cloud_done', colour: 'blue' }
+                            'sync-complete': { msg: 'Synced!', icon: 'cloud_done', colour: 'blue' },
+                            'sync-failed': { msg: 'Error', icon: 'cloud_alert', colour: 'red' }
                         }"
-                        class="inline-flex items-center gap-3 px-4 bg-white/10 border border-white/20 rounded-full"
+                        @click="requestSync"
+                        class="group inline-flex items-center relative gap-3 px-4 bg-white/10 border border-white/20 rounded-full cursor-pointer"
                         :class="`text-${$data[status].colour}-400`"
                     >
+
                         <span x-text="$data[status].icon" class="material-icons"></span>
                         <strong x-text="$data[status].msg" class="font-bold"></strong>
-                    </div>
+
+                        <span class="text-sm whitespace-nowrap absolute top-full -mt-2 group-hover:mt-2 left-1/2 -translate-x-1/2 px-2 py-1 text-white bg-neutral-700/75 opacity-0 group-hover:opacity-100 rounded transition-all z-10 cursor-default pointer-events-none">
+                            Click to trigger manual sync
+                        </span>
+
+                    </button>
 
                     <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded cursor-pointer">
                         <span class="material-icons">logout</span>
@@ -100,13 +108,14 @@
 
                                 const form = $el.querySelector('form');
                                 form['title'].value = isEdit ? todo.title : '';
-                                form['description'].value = isEdit ? todo.description : '';
+                                form['description'].value = isEdit ? (todo.description ?? '') : '';
                                 form['reminder']._flatpickr.setDate(isEdit ? todo.reminder : '');
                             "
+                            @destroy-edit-form-flatpickr="$el.querySelector('form')['reminder']._flatpickr.destroy()"
                             class="p-2 bg-black/50 border border-gray-500 rounded"
                         >
 
-                            <div>
+                            <div x-show="!isEdit">
                                 <div class="flex items-center gap-2">
 
                                     <button
@@ -143,7 +152,12 @@
                                             <span class="material-icons">more_vert</span>
                                         </button>
 
-                                        <div x-show="open" x-transition.origin.top.right class="absolute -right-5 py-2 bg-white rounded shadow z-20">
+                                        <div
+                                            x-show="open"
+                                            x-transition.origin.top.right
+                                            @click.outside="$dispatch('toggle')"
+                                            class="absolute -right-5 py-2 bg-white rounded shadow"
+                                        >
                                             <ul class="min-w-48 w-max">
 
                                                 <li
@@ -160,6 +174,7 @@
                                                 <li
                                                     @click="
                                                         if (confirm(`Are you sure to delete &quot;${todo.title}&quot;?`)) {
+                                                            $dispatch('destroy-edit-form-flatpickr');
                                                             await deleteTodo(todo.id);
                                                         }
                                                         $dispatch('toggle');
@@ -172,8 +187,6 @@
 
                                             </ul>
                                         </div>
-
-                                        <div x-show="open" @click="$dispatch('toggle')" class="fixed inset-0 z-10"></div>
 
                                     </div>
                                     
@@ -195,6 +208,8 @@
                                 @reset="$dispatch('edit', false)"
                                 class="flex flex-col gap-2 px-2 my-2"
                             >
+
+                                <h3 class="text-lg font-bold mb-2">Edit todo</h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
 
@@ -244,13 +259,13 @@
 
                 <div x-show="todos.length === 0" class="flex flex-col items-center gap-8 py-8">
                     <img src="assets/empty.jpg" class="w-40 brightness-75">
-                    <h3 class="text-2xl italic text-white/50">Không còn lời nhắc nào nữa, bạn có thể chill được rồi!</h3>
+                    <h3 class="text-2xl italic text-white/50">No more todo, you can chill now (or you are offline)!</h3>
                 </div>
 
             </div>
 
         </div>
 
-        <div class="absolute inset-0 bg-black/60 z-0"></div>
+        <div class="fixed inset-0 bg-black/60 z-0"></div>
     </body>
 </html>
