@@ -51,8 +51,7 @@ document.addEventListener("alpine:init", () => {
                 const tempId = Date.now();
                 const newTodo = {
                     id: tempId,
-                    title,
-                    description: description,
+                    title, description,
                     isCompleted: false,
                     reminder
                 }
