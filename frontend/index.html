@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
     <head>
         <title>Todo App</title>
         <meta charset="UTF-8">
@@ -19,6 +19,7 @@
         <script src="https://unpkg.com/@alpinejs/persist@3.x.x" defer></script>
         <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 
+        <script src="/js/logger.js"></script>
         <script src="/app.js"></script>
         <link rel="stylesheet" href="/assets/css/styles.css">
     </head>
@@ -26,13 +27,35 @@
         <div x-data="app" class="relative z-10">
 
             <header class="sticky top-0 bg-black/50 border-b border-gray-500">
-                <div class="flex gap-2 px-6 py-3">
+                <div class="flex gap-4 px-6 py-3">
 
                     <div class="flex-1"></div>
 
+                    <button
+                        x-data="{
+                            'online': { msg: 'Online', icon: 'wifi', colour: 'green' },
+                            'offline': { msg: 'Offline', icon: 'wifi_off', colour: 'red' },
+                            'sync-progress': { msg: 'Syncing...', icon: 'backup', colour: 'amber' },
+                            'sync-complete': { msg: 'Synced!', icon: 'cloud_done', colour: 'blue' },
+                            'sync-failed': { msg: 'Error', icon: 'cloud_alert', colour: 'red' }
+                        }"
+                        @click="requestSync"
+                        class="group inline-flex items-center relative gap-3 px-4 bg-white/10 border border-white/20 rounded-full cursor-pointer"
+                        :class="`text-${$data[status].colour}-400`"
+                    >
+
+                        <span x-text="$data[status].icon" class="material-icons"></span>
+                        <strong x-text="$data[status].msg" class="font-bold"></strong>
+
+                        <span class="text-sm whitespace-nowrap absolute top-full -mt-2 group-hover:mt-2 left-1/2 -translate-x-1/2 px-2 py-1 text-white bg-neutral-700/75 opacity-0 group-hover:opacity-100 rounded transition-all z-10 cursor-default pointer-events-none">
+                            Click to trigger manual sync
+                        </span>
+
+                    </button>
+
                     <button @click="logOut" class="px-4 py-2 bg-orange-400/25 border border-orange-400/50 rounded cursor-pointer">
                         <span class="material-icons">logout</span>
-                        <span class="max-sm:hidden ms-2">Đăng xuất</span>
+                        <span class="max-sm:hidden ms-2">Log out</span>
                     </button>
 
                 </div>
@@ -41,7 +64,7 @@
             <div class="max-w-4xl p-8 mx-auto">
 
                 <h1 class="text-4xl font-bold text-center py-6">
-                    Xin chào, <span x-text="localStorage.getItem('user')" class="text-blue-500"></span>!
+                    Welcome back, <span x-text="localStorage.getItem('user')" class="text-blue-500"></span>!
                 </h1>
 
                 <form
@@ -58,20 +81,20 @@
                     <input
                         type="text"
                         name="title"
-                        placeholder="Bạn muốn thêm lời nhắc gì không...?"
+                        placeholder="Remind yourself of something...?"
                         class="col-span-1 sm:col-span-2 px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                     >
 
                     <input
                         name="reminder"
                         x-init="flatpickr($el, flatpickrOptions)"
-                        placeholder="Chọn thời gian..."
+                        placeholder="Remind at..."
                         class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                     >
 
                     <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded cursor-pointer">
                         <span class="material-icons">send</span>
-                        <span class="ms-2">Thêm lời nhắc!</span>
+                        <span class="ms-2">Add todo!</span>
                     </button>
 
                 </form>
@@ -85,13 +108,14 @@
 
                                 const form = $el.querySelector('form');
                                 form['title'].value = isEdit ? todo.title : '';
-                                form['description'].value = isEdit ? todo.description : '';
+                                form['description'].value = isEdit ? (todo.description ?? '') : '';
                                 form['reminder']._flatpickr.setDate(isEdit ? todo.reminder : '');
                             "
+                            @destroy-edit-form-flatpickr="$el.querySelector('form')['reminder']._flatpickr.destroy()"
                             class="p-2 bg-black/50 border border-gray-500 rounded"
                         >
 
-                            <div>
+                            <div x-show="!isEdit">
                                 <div class="flex items-center gap-2">
 
                                     <button
@@ -128,7 +152,12 @@
                                             <span class="material-icons">more_vert</span>
                                         </button>
 
-                                        <div x-show="open" x-transition.origin.top.right class="absolute -right-5 py-2 bg-white rounded shadow z-20">
+                                        <div
+                                            x-show="open"
+                                            x-transition.origin.top.right
+                                            @click.outside="$dispatch('toggle')"
+                                            class="absolute -right-5 py-2 bg-white rounded shadow"
+                                        >
                                             <ul class="min-w-48 w-max">
 
                                                 <li
@@ -139,12 +168,13 @@
                                                     class="px-4 py-2 cursor-pointer text-black hover:bg-gray-200"
                                                 >
                                                     <span class="material-icons">edit</span>
-                                                    <span class="ms-2">Chỉnh sửa lời nhắc</span>
+                                                    <span class="ms-2">Edit todo</span>
                                                 </li>
 
                                                 <li
                                                     @click="
-                                                        if (confirm(`Bạn muốn xóa lời nhắc &quot;${todo.title}&quot;?`)) {
+                                                        if (confirm(`Are you sure to delete &quot;${todo.title}&quot;?`)) {
+                                                            $dispatch('destroy-edit-form-flatpickr');
                                                             await deleteTodo(todo.id);
                                                         }
                                                         $dispatch('toggle');
@@ -152,13 +182,11 @@
                                                     class="px-4 py-2 cursor-pointer text-red-600 hover:bg-red-100"
                                                 >
                                                     <span class="material-icons">delete</span>
-                                                    <span class="ms-2">Xóa lời nhắc</span>
+                                                    <span class="ms-2">Delete todo</span>
                                                 </li>
 
                                             </ul>
                                         </div>
-
-                                        <div x-show="open" @click="$dispatch('toggle')" class="fixed inset-0 z-10"></div>
 
                                     </div>
                                     
@@ -181,19 +209,21 @@
                                 class="flex flex-col gap-2 px-2 my-2"
                             >
 
+                                <h3 class="text-lg font-bold mb-2">Edit todo</h3>
+
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
 
                                     <input
                                         type="text"
                                         name="title"
-                                        placeholder="Tiêu đề"
+                                        placeholder="Title"
                                         class="md:col-span-2 font-bold px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                                     >
 
                                     <input
                                         name="reminder"
                                         x-init="flatpickr($el, flatpickrOptions)"
-                                        placeholder="Chọn thời gian..."
+                                        placeholder="Remind at..."
                                         class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                                     >
 
@@ -202,7 +232,7 @@
                                 <textarea
                                     name="description"
                                     rows="4"
-                                    placeholder="Mô tả"
+                                    placeholder="Description"
                                     class="px-4 py-2 placeholder-white placeholder-opacity-50 bg-white/25 border border-white/50 outline-none rounded"
                                     style="resize: none"
                                 ></textarea>
@@ -211,12 +241,12 @@
 
                                     <button type="submit" class="px-4 py-2 bg-blue-600/50 border border-blue-400 rounded cursor-pointer">
                                         <span class="material-icons">check</span>
-                                        <span class="ms-2">Đồng ý</span>
+                                        <span class="ms-2">OK</span>
                                     </button>
 
                                     <button type="reset" class="px-4 py-2 bg-white/25 border border-white/50 rounded cursor-pointer">
                                         <span class="material-icons">close</span>
-                                        <span class="ms-2">Hủy</span>
+                                        <span class="ms-2">Cancel</span>
                                     </button>
 
                                 </div>
@@ -229,13 +259,13 @@
 
                 <div x-show="todos.length === 0" class="flex flex-col items-center gap-8 py-8">
                     <img src="assets/empty.jpg" class="w-40 brightness-75">
-                    <h3 class="text-2xl italic text-white/50">Không còn lời nhắc nào nữa, bạn có thể chill được rồi!</h3>
+                    <h3 class="text-2xl italic text-white/50">No more todo, you can chill now (or you are offline)!</h3>
                 </div>
 
             </div>
 
         </div>
 
-        <div class="absolute inset-0 bg-black/60 z-0"></div>
+        <div class="fixed inset-0 bg-black/60 z-0"></div>
     </body>
 </html>
