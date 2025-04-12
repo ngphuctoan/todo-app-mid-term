@@ -79,7 +79,6 @@
             const json = {};
             data.forEach((value, key) => json[key] = value);
 
-            // Ref: https://stackoverflow.com/questions/43127814/regex-for-at-least-1-number-1-lower-case-and-1-upper-case-letter
             if (!/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z]).*$/.test(json["pass"])) {
                 showError("Password must include uppercase, lowercase letters and numbers!");
                 return;
