@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script" rel="stylesheet">
 </head>
 <body class="flex justify-center items-center font-[Quicksand] min-h-screen bg-[url(/assets/imgs/login_bg.jpg)] bg-contain bg-cover bg-bottom text-white p-4">
+    
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-4xl bg-black/60 border border-gray-500 rounded-lg">
             <!-- Left -->
             <div class="flex-1 flex md:flex-col justify-center items-center md:gap-8 p-4 bg-blue-400/50">
@@ -20,33 +21,40 @@
             </div>
             <!-- Right-->
             <div class="flex-1 p-6">
-                <h2 class="text-3xl font-bold text-center mt-2 mb-4 text-blue-400">Đăng Nhập</h2>
+                <h2 class="text-3xl font-bold text-center mt-2 mb-4 text-blue-400">Login</h2>
         
                 <form id="logIn">
                     <div class="mb-4">
-                        <label for="user" class="block text-sm opacity-50">Tên người dùng</label>
+                        <label for="user" class="block text-sm opacity-50">Username</label>
                         <input type="text" id="user" name="user" class="w-full mt-2 px-4 py-3 bg-white/25 border border-white/50 rounded outline-none" required>
                     </div>
                     <div class="mb-8">
-                        <label for="pass" class="block text-sm opacity-50">Mật khẩu</label>
+                        <label for="pass" class="block text-sm opacity-50">Password</label>
                         <div class="relative mt-2">
-                            <button id="showPassword" type="button" class="fa-solid fa-eye w-9 aspect-square absolute end-2 bottom-1/2 transform translate-y-1/2 p-2 hover:bg-white/20 active:bg-white/25 rounded-full transition"></button>
-                            <input type="password" id="pass" name="pass" class="w-full px-4 py-3 bg-white/25 border border-white/50 rounded outline-none" required minlength="4">
+                            <input type="password" id="pass" name="pass" class="w-full px-4 py-3 bg-white/25 border border-white/50 rounded outline-none" required minlength="8">
+                            <button type="button" class="show-password-btn w-10 h-10 absolute end-1 bottom-1/2 transform translate-y-1/2 p-2 hover:bg-white/20 active:bg-white/25 rounded-full transition">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
                         </div>
                     </div>
         
-                    <button type="submit" class="w-full bg-blue-600/50 border border-blue-600 text-white py-3 rounded">Đăng Nhập</button>
+                    <button type="submit" class="w-full bg-blue-600/50 border border-blue-600 text-white py-3 rounded">Login!</button>
                 </form>
         
                 <div class="mt-4 text-center">
                     <p class="text-sm">
-                        Chưa có tài khoản? &ensp;
+                        New to the app? &ensp;
                         <a href="/register" class="underline text-blue-400">
-                            Đăng ký ngay!
+                            Register an account!
                         </a>
                     </p>
                 </div>
             </div>
+    </div>
+
+    <div id="errorToast" class="fixed bottom-10 px-4 py-2 bg-red-800/60 opacity-0 border border-red-800 rounded transition-all">
+        <i class="fa-solid fa-circle-exclamation text-2xl align-[-.2rem] me-3"></i>
+        <span>Wrong username or password.</span>
     </div>
 
     <script>
@@ -55,6 +63,9 @@
         }
 
         const logInForm = document.forms["logIn"];
+        const errorToast = document.getElementById("errorToast");
+
+        let errorToastTimeout;
 
         logInForm.onsubmit = async (event) => {
             event.preventDefault();
@@ -73,22 +84,37 @@
                 localStorage.setItem("user", json["user"]);
                 window.location.href = "/";
             } else {
-                alert("Invalid credentials!");
+                const result = await response.json();
+                showError(`(${response.status})&ensp;${result.error}`);
             }
         }
 
-        const showPassword = document.getElementById("showPassword");
-        const passwordInput = document.getElementById("pass");
+        function showError(message, timeoutSeconds = 3) {
+            clearTimeout(errorToastTimeout);
 
-        showPassword.onclick = () => {
-            if (passwordInput.type === "text") {
-                passwordInput.type = "password";
-                showPassword.classList.remove("fa-eye-slash");
-                showPassword.classList.add("fa-eye");
-            } else {
-                passwordInput.type = "text";
-                showPassword.classList.remove("fa-eye");
-                showPassword.classList.add("fa-eye-slash");
+            errorToast.querySelector("span").innerHTML = message;
+
+            errorToast.classList.remove("bottom-0", "opacity-10");
+            errorToast.classList.add("bottom-20", "opacity-100");
+
+            errorToastTimeout = setTimeout(() => {
+                errorToast.classList.remove("bottom-20", "opacity-100");
+                errorToast.classList.add("bottom-10", "opacity-0");
+            }, timeoutSeconds * 1000);
+        }
+
+        for (const btn of document.getElementsByClassName("show-password-btn")) {
+            const input = btn.previousElementSibling;
+            const icon = btn.querySelector("i");
+
+            btn.onclick = () => {
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.className = "fa-solid fa-eye-slash";
+                } else {
+                    input.type = "password";
+                    icon.className = "fa-solid fa-eye";
+                }
             }
         }
     </script>
