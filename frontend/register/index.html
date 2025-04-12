@@ -6,20 +6,16 @@
     <title>Đăng Ký</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script" rel="stylesheet">
 </head>
-    <style>
-        .font-dancing {
-            font-family: 'Dancing Script', cursive;
-        }
-    </style>
-<body class="flex justify-center items-center min-h-screen bg-[url(../assets/bg2.jpg)] bg-contain bg-cover bg-bottom text-white p-4">
-    <div class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-4xl bg-black/50 border border-gray-500 rounded-lg">
+<body class="flex justify-center items-center font-[Quicksand] min-h-screen bg-[url(/assets/imgs/register_bg.jpg)] bg-contain bg-cover bg-bottom text-white p-4">
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-4xl bg-black/60 border border-gray-500 rounded-lg">
         <!-- Left -->
         <div class="flex-1 flex md:flex-col justify-center items-center md:gap-8 p-4 bg-blue-400/50">
             <!-- Icon -->
             <i class="shrink-0 fas fa-book flex justify-center items-center text-8xl w-40 aspect-square scale-50 md:scale-100 -m-10 md:m-0 border-8 text-sky-300 border-blue-400/50 rounded-full"></i>
-            <span class="font-dancing text-4xl text-center ms-4 md:m-0 text-blue-400">Note Book</span> <!-- Dùng font Dancing Script -->
+            <span class="font-['Dancing_Script',cursive] text-4xl text-center ms-4 md:m-0 text-blue-400">Todo App</span> <!-- Dùng font Dancing Script -->
         </div>
         <!-- Right -->
         <div class="flex-1 p-6">
@@ -28,22 +24,18 @@
             <form id="registerForm" method="POST">
                 <div class="mb-4">
                     <label for="name" class="block text-sm opacity-50">Tên người dùng</label>
-                    <input type="text" id="name" name="name" placeholder="Tên người dùng" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required>
+                    <input type="text" id="name" name="name" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required>
                 </div>
-                <!-- <div class="mb-4">
-                    <label for="email" class="block text-sm opacity-50">Email</label>
-                    <input type="email" id="email" name="email" placeholder="123dz@gmail.com" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required>
-                </div> -->
                 <div class="mb-4">
                     <label for="password" class="block text-sm opacity-50">Mật khẩu</label>
-                    <input type="password" id="password" name="password" placeholder="******" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required minlength="6">
+                    <input type="password" id="password" name="password" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required minlength="6">
                 </div>
                 <div class="mb-4">
                     <label for="confirmPassword" class="block text-sm opacity-50">Xác nhận mật khẩu</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="******" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required minlength="6">
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="w-full mt-2 p-3 bg-white/25 border border-white/50 rounded outline-none" required>
                 </div>
     
-                <button type="submit" class="w-full bg-blue-600/50 border border-blue-600 text-white py-3 rounded">Đăng Ký</button>
+                <button type="submit" class="w-full bg-blue-600/50 border border-blue-600 text-white py-3 mt-4 rounded">Đăng Ký</button>
             </form>
     
             <div class="mt-4 text-center">
