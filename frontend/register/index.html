@@ -6,57 +6,132 @@
     <title>Đăng Ký</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script" rel="stylesheet">
 </head>
-    <style>
-        .font-dancing {
-            font-family: 'Dancing Script', cursive;
-        }
-    </style>
-<body>
-    <div class="bg-gray-100 h-screen flex justify-center items-center">
-        <div class="flex flex-col md:flex-row w-full max-w-7xl bg-white shadow-md rounded-lg">
-            <!-- Left -->
-            <div class="w-full md:w-1/2 bg-blue-100 text-white flex justify-center items-center rounded-t-lg md:rounded-l-lg md:rounded-t-none flex-col p-4">
-                <!-- Icon -->
-                <div class="flex justify-center items-center w-48 h-48 md:w-72 md:h-72 border-8 border-blue-300 rounded-full">
-                    <i class="fas fa-book text-6xl md:text-9xl scale-150 text-sky-300"></i>
+<body class="flex justify-center items-center font-[Quicksand] min-h-screen bg-[url(/assets/imgs/register_bg.jpg)] bg-contain bg-cover bg-bottom text-white p-4">
+    
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-4xl bg-black/60 border border-gray-500 rounded-lg">
+        <!-- Left -->
+        <div class="flex-1 flex md:flex-col justify-center items-center md:gap-8 p-4 bg-blue-400/50">
+            <!-- Icon -->
+            <i class="shrink-0 fas fa-book flex justify-center items-center text-8xl w-40 aspect-square scale-50 md:scale-100 -m-10 md:m-0 border-8 text-sky-300 border-blue-400/50 rounded-full"></i>
+            <span class="font-['Dancing_Script',cursive] text-4xl text-center ms-4 md:m-0 text-blue-400">Todo App</span> <!-- Dùng font Dancing Script -->
+        </div>
+        <!-- Right -->
+        <div class="flex-1 p-6">
+            <h2 class="text-3xl font-bold text-center mt-2 mb-4 text-blue-500">Register</h2>
+    
+            <form id="register">
+                <div class="mb-4">
+                    <label for="name" class="block text-sm opacity-50">Username</label>
+                    <input type="text" id="user" name="user" class="w-full mt-2 px-4 py-3 bg-white/25 border border-white/50 rounded outline-none" required pattern="^[a-z\d]+$">
                 </div>
-                <span class="font-dancing text-3xl md:text-4xl mt-4 text-blue-800">Note Book</span> <!-- Dùng font Dancing Script -->
-            </div>
-
-            <!-- Right -->
-            <div class="w-full md:w-1/2 p-6 md:p-8">
-                <h2 class="text-3xl font-bold text-center mb-6">Đăng Ký</h2>
-        
-                <form id="registerForm" method="POST">
-                    <div class="mb-4">
-                        <label for="name" class="block text-sm font-medium text-gray-700">Họ và tên</label>
-                        <input type="text" id="name" name="name" placeholder="Họ và tên" class="mt-2 p-3 w-full border border-gray-300 rounded-md" required>
+                <div class="mb-4">
+                    <label for="password" class="block text-sm opacity-50">Password</label>
+                    <div class="relative mt-2">
+                        <input type="password" id="pass" name="pass" class="w-full px-4 py-3 bg-white/25 border border-white/50 rounded outline-none" required minlength="8">
+                        <button type="button" class="show-password-btn w-10 h-10 absolute end-1 bottom-1/2 transform translate-y-1/2 p-2 hover:bg-white/20 active:bg-white/25 rounded-full transition">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
                     </div>
-                    <div class="mb-4">
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email" name="email" placeholder="123dz@gmail.com" class="mt-2 p-3 w-full border border-gray-300 rounded-md" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
-                        <input type="password" id="password" name="password" placeholder="******" class="mt-2 p-3 w-full border border-gray-300 rounded-md" required minlength="6">
-                    </div>
-                    <div class="mb-4">
-                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="******" class="mt-2 p-3 w-full border border-gray-300 rounded-md" required minlength="6">
-                    </div>
-        
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-400 hover:text-gray-600">Đăng Ký</button>
-                </form>
-        
-                <div class="mt-4 text-center">
-                    <p class="text-sm">Đã có tài khoản? <a href="/login" class="text-blue-500">Đăng nhập ngay</a></p>
                 </div>
+                <div class="mb-4">
+                    <label for="confirmPassword" class="block text-sm opacity-50">Confirm password</label>
+                    <div class="relative mt-2">
+                        <input type="password" id="confirmPass" name="confirmPass" class="w-full px-4 py-3 bg-white/25 border border-white/50 rounded outline-none" required>
+                        <button type="button" class="show-password-btn w-10 h-10 absolute end-1 bottom-1/2 transform translate-y-1/2 p-2 hover:bg-white/20 active:bg-white/25 rounded-full transition">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+    
+                <button type="submit" class="w-full bg-blue-600/50 border border-blue-600 text-white py-3 mt-4 rounded">Register!</button>
+            </form>
+    
+            <div class="mt-4 text-center">
+                <p class="text-sm">
+                    Already have an account?  &ensp;
+                    <a href="/login" class="underline text-blue-500">
+                        Sign in instead!
+                    </a>
+                </p>
             </div>
         </div>
     </div>
 
-    <script src="../js/confirm_pass.js"></script>
+    <div id="errorToast" class="fixed bottom-10 px-4 py-2 bg-red-800/60 opacity-0 border border-red-800 rounded transition-all">
+        <i class="fa-solid fa-circle-exclamation text-2xl align-[-.2rem] me-3"></i>
+        <span>Wrong username or password.</span>
+    </div>
+
+    <script>
+        const registerForm = document.forms["register"];
+        const errorToast = document.getElementById("errorToast");
+
+        let errorToastTimeout;
+
+        registerForm.onsubmit = async (event) => {
+            event.preventDefault();
+
+            const data = new FormData(registerForm);
+
+            const json = {};
+            data.forEach((value, key) => json[key] = value);
+
+            // Ref: https://stackoverflow.com/questions/43127814/regex-for-at-least-1-number-1-lower-case-and-1-upper-case-letter
+            if (!/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z]).*$/.test(json["pass"])) {
+                showError("Password must include uppercase, lowercase letters and numbers!");
+                return;
+            }
+
+            if (json["pass"] !== json["confirmPass"]) {
+                showError("Password doesn't match!");
+                return;
+            }
+
+            const response = await fetch("/api/register", {
+                method: "POST",
+                body: JSON.stringify(json)
+            });
+
+            if (response.ok) {
+                window.location.href = "/login";
+            } else {
+                const result = await response.json();
+                showError(`(${response.status})&ensp;${result.error}`);
+            }
+        }
+
+        function showError(message, timeoutSeconds = 3) {
+            clearTimeout(errorToastTimeout);
+
+            errorToast.querySelector("span").innerHTML = message;
+
+            errorToast.classList.remove("bottom-0", "opacity-10");
+            errorToast.classList.add("bottom-20", "opacity-100");
+
+            errorToastTimeout = setTimeout(() => {
+                errorToast.classList.remove("bottom-20", "opacity-100");
+                errorToast.classList.add("bottom-10", "opacity-0");
+            }, timeoutSeconds * 1000);
+        }
+
+        for (const btn of document.getElementsByClassName("show-password-btn")) {
+            const input = btn.previousElementSibling;
+            const icon = btn.querySelector("i");
+
+            btn.onclick = () => {
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.className = "fa-solid fa-eye-slash";
+                } else {
+                    input.type = "password";
+                    icon.className = "fa-solid fa-eye";
+                }
+            }
+        }
+    </script>
+  
 </body>
 </html>
