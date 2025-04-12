@@ -1,3 +1,5 @@
+importScripts("/js/logger.js");
+
 const VERSION = "v1";
 
 const APP_CACHE = `todo-app-${VERSION}`;
@@ -10,6 +12,7 @@ const APP_ASSETS = [
     "/manifest.json",
     "/app.js",
     "/sw.js",
+    "/js/logger.js",
     "/assets/bg.jpg",
     "/assets/empty.jpg",
     "/assets/icons/192.png",
@@ -68,7 +71,7 @@ self.addEventListener("fetch", event => {
     // Blocks API requests from the PHP-FPM server.
     if (url.pathname.startsWith("/api") && !self.navigator.onLine) {
         event.respondWith(new Response(
-            JSON.stringify({ error: "You are offline!" }),
+            JSON.stringify({ error: "offline" }),
             {
                 status: 503,
                 headers: { "Content-Type": "application/json" }
@@ -107,46 +110,77 @@ self.addEventListener("sync", event => {
 });
 
 async function syncTodos() {
-    console.log("Syncing todos...");
+    await postMessageToClients("sync-progress");
+    console.group(...syncLog("In progress...", "black", "gold"));
 
     const db = await caches.open("sync-data");
     const response = await db.match("/sync-queue");
     const queue = response ? await response.json() : [];
 
-    for (const { action, id, todoJson } of queue) {
-        try {
-            switch (action) {
-                case "create":
-                    await fetch("/api/todos", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(todoJson)
-                    });
-                    break;
-                case "update":
-                    await fetch(`/api/todos/${id}`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(todoJson)
-                    });
-                    break;
-                case "delete":
-                    await fetch(`/api/todos/${id}`, {
-                        method: "DELETE"
-                    });
-                    break;
-            }
+    const newIdMap = new Map();
 
-            console.log("Sync complete!");
-        } catch (error) {
-            console.error("Sync failed:", error);
+    for (const { action, id, todoJson } of queue) {
+        if (action === "create") {
+            const response = await fetch("/api/todos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(todoJson)
+            });
+            const { id: newId, title } = await response.json();
+
+            newIdMap.set(id, newId);
+
+            console.log(...syncLog(`"${title}" (ID: ${newId})`, "white", "blue", "CREATE"));
         }
     }
 
+    for (const { action, id: originalId, todoJson } of queue) {
+        if (action === "create") {
+            continue;
+        }
+
+        const id = newIdMap.get(originalId) || originalId;
+
+        try {
+            if (action === "update") {
+                const response = await fetch(`/api/todos/${id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(todoJson)
+                });
+                const { title } = await response.json();
+
+                console.log(...syncLog(`"${title}" (ID: ${id})`, "black", "gold", "UPDATE"));
+            } else if (action === "delete") {
+                const response = await fetch(`/api/todos/${id}`, {
+                    method: "DELETE"
+                });
+                const { title } = await response.json();
+
+                console.log(...syncLog(`"${title}" (ID: ${id})`, "white", "red", "DELETE"));
+            }
+        } catch (error) {
+            console.groupEnd();
+
+            console.log(...syncLog(`Failed:\n${error}`, "white", "red"));
+            await postMessageToClients("sync-failed");
+
+            return;
+        }
+    }
+
+    console.groupEnd();
+
     await db.put("/sync-queue", new Response(JSON.stringify([])));
 
+    await postMessageToClients("sync-complete");
+
+    console.log(...syncLog("Complete!", "black", "lime"));
+}
+
+async function postMessageToClients(message) {
     const matchedClients = await self.clients.matchAll();
     for (const client of matchedClients) {
-        client.postMessage({ type: "sync-complete" });
+        client.postMessage({ type: message });
     }
 }
