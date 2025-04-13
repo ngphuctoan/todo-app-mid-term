@@ -23,7 +23,7 @@ A todo demo PWA app for Web and App Development's mid-term essay.
 3. Generate VAPID keys and add them to `.env`:
 
     ```
-    docker exec -it php_fpm php tools/generate_vapid_keys.php
+    docker compose exec -it php_fpm php tools/generate_vapid_keys.php
     ```
 
 ## Credits

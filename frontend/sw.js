@@ -1,4 +1,4 @@
-importScripts("/js/logger.js");
+importScripts("/logger.js");
 
 const VERSION = "v1";
 

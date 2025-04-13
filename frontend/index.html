@@ -19,11 +19,11 @@
         <script src="https://unpkg.com/@alpinejs/persist@3.x.x" defer></script>
         <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 
-        <script src="/js/logger.js"></script>
+        <script src="/logger.js"></script>
         <script src="/app.js"></script>
         <link rel="stylesheet" href="/assets/css/styles.css">
     </head>
-    <body class="font-[Quicksand] min-h-screen relative text-white bg-[url(assets/imgs/app_bg.jpg)] bg-cover bg-fixed bg-no-repeat">
+    <body class="font-[Quicksand] min-h-screen relative text-white bg-[url(/assets/imgs/app_bg.jpg)] bg-cover bg-fixed bg-no-repeat">
         <div x-data="app" class="relative z-10">
 
             <header class="sticky top-0 bg-black/50 border-b border-gray-500">
@@ -258,7 +258,7 @@
                 </ul>
 
                 <div x-show="todos.length === 0" class="flex flex-col items-center gap-8 py-8">
-                    <img src="assets/empty.jpg" class="w-40 brightness-75">
+                    <img src="/assets/imgs/empty.jpg" class="w-40 brightness-75">
                     <h3 class="text-2xl italic text-white/50">No more todo, you can chill now (or you are offline)!</h3>
                 </div>
 
